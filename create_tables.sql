@@ -1,7 +1,21 @@
--- create_tables.sql
+# create_tables.py
+# creates tables users status tasks in postgresql
 
-BEGIN;
+import os
+import psycopg2
 
+
+def get_conn():
+    return psycopg2.connect(
+        host=os.getenv("PGHOST", "localhost"),
+        port=int(os.getenv("PGPORT", "5432")),
+        dbname=os.getenv("PGDATABASE", "task_manager"),
+        user=os.getenv("PGUSER", "postgres"),
+        password=os.getenv("PGPASSWORD", "postgres"),
+    )
+
+
+DDL = """
 DROP TABLE IF EXISTS tasks;
 DROP TABLE IF EXISTS status;
 DROP TABLE IF EXISTS users;
@@ -27,5 +41,19 @@ CREATE TABLE tasks (
 
 CREATE INDEX idx_tasks_user_id ON tasks(user_id);
 CREATE INDEX idx_tasks_status_id ON tasks(status_id);
+"""
 
-COMMIT;
+
+def main():
+    conn = get_conn()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(DDL)
+        print("tables created")
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()
