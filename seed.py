@@ -26,7 +26,11 @@ def reset_tables(cur):
 
 def seed_statuses(cur):
     statuses = [("new",), ("in progress",), ("completed",)]
-    execute_values(cur, "INSERT INTO status (name) VALUES %s;", statuses)
+    execute_values(
+        cur,
+        "INSERT INTO status (name) VALUES %s ON CONFLICT (name) DO NOTHING;",
+        statuses,
+    )
     cur.execute("SELECT id, name FROM status;")
     return {name: sid for sid, name in cur.fetchall()}
 
